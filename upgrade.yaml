@@ -1,0 +1,17 @@
+- hosts: all
+  remote_user: root
+  tasks:
+
+        - name: Install Preupgrade and Upgrade Tool
+          yum: state=present name={{ item }}
+          with_items:
+          - preupgrade-assistant
+          - preupgrade-assistant-el6toel7
+          - redhat-upgrade-tool
+          - mysql
+
+        - name: Run preupgtool
+          shell: 'preupg --text --force'
+
+        - name: Install Upgrade
+          shell: 'redhat-upgrade-tool --network 7.3 --instrepo "http://192.168.122.2/repos/rhel7/rhel73" --verbose --reboot --cleanup-post --force'

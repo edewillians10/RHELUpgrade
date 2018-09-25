@@ -1,0 +1,48 @@
+- hosts: all
+  remote_user: root
+  tasks:
+
+#
+# Clean all Subscription, Register into RHN, attach employee subscription, remove useless repos and add extra and optionals for upgrade
+#
+
+        - name: Unregister system and clean subscription-manager
+          shell: subscription-manager unregister && subscription-manager clean
+          ignore_errors: yes
+
+        - name: Register into RHN via Subscription-Manager
+          shell: subscription-manager register --username='USER' --password='PASSWORD' && subscription-manager attach --pool=8a85f98144844aff014488d058bf15be
+
+        - name: Remove employee repos
+          shell: subscription-manager repos --disable=rhel-server-dts2-6-rpms --disable=rhel-server-6-rhds-9-rpms --disable=rhel-6-server-htb-rpms --disable=rhel-6-server-aus-rpms --disable=rhel-6-server-tus-rpms --disable=rhel-server-dts-6-rpms        
+
+        - name: Attach Extras and Optional for RHEL6
+          shell: subscription-manager repos --enable rhel-6-server-extras-rpms && subscription-manager repos --enable rhel-6-server-optional-rpms 
+
+        - name: upgrade all packages
+          yum:
+             name='*'
+             update_cache=yes 
+             state=latest
+
+#
+# Checking needed to reboot system due to yum update
+#
+
+        - name: Check for reboot hint.
+          shell: LAST_KERNEL=$(rpm -q --last kernel | perl -pe 's/^kernel-(\S+).*/$1/' | head -1); CURRENT_KERNEL=$(uname -r); if [ $LAST_KERNEL != $CURRENT_KERNEL ]; then echo 'reboot'; else echo 'no'; fi
+          ignore_errors: true
+          register: reboot_hint
+
+        - name: Rebooting ...
+          command: shutdown -r now "Reboot required for updated kernel"
+          async: 0
+          poll: 0
+          ignore_errors: true
+          when: reboot_hint.stdout.find("reboot") != -1
+          register: rebooting
+
+        - name: Wait for thing to reboot...
+          pause: seconds=45
+          when: rebooting|changed
+
