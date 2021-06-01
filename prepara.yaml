@@ -13,7 +13,7 @@
           ignore_errors: yes
 
         - name: Register into Satellite via Subscription-Manager
-          shell: subscription-manager register --username='USER' --password='PASSWORD' && subscription-manager attach --pool=8a85f98144844aff014488d058bf15be
+          shell: subscription-manager register --org="BestBuy_Canada" --activationkey="RHEL6" --force
 
         - name: Remove legacy not used repos
           shell: subscription-manager repos --disable=rhel-server-dts2-6-rpms --disable=rhel-server-6-rhds-9-rpms --disable=rhel-6-server-htb-rpms --disable=rhel-6-server-aus-rpms --disable=rhel-6-server-tus-rpms --disable=rhel-server-dts-6-rpms        
