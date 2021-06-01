@@ -1,19 +1,21 @@
 - hosts: all
-  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
   tasks:
 
 #
-# Clean all Subscription, Register into RHN, attach employee subscription, remove useless repos and add extra and optionals for upgrade
+# Clean all Subscription, Register into Satellite, remove useless repos and add extra and optionals for upgrade
 #
 
         - name: Unregister system and clean subscription-manager
           shell: subscription-manager unregister && subscription-manager clean
           ignore_errors: yes
 
-        - name: Register into RHN via Subscription-Manager
+        - name: Register into Satellite via Subscription-Manager
           shell: subscription-manager register --username='USER' --password='PASSWORD' && subscription-manager attach --pool=8a85f98144844aff014488d058bf15be
 
-        - name: Remove employee repos
+        - name: Remove legacy not used repos
           shell: subscription-manager repos --disable=rhel-server-dts2-6-rpms --disable=rhel-server-6-rhds-9-rpms --disable=rhel-6-server-htb-rpms --disable=rhel-6-server-aus-rpms --disable=rhel-6-server-tus-rpms --disable=rhel-server-dts-6-rpms        
 
         - name: Attach Extras and Optional for RHEL6

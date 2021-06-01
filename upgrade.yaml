@@ -1,5 +1,7 @@
 - hosts: all
-  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
   tasks:
 
         - name: Install Preupgrade and Upgrade Tool
@@ -8,7 +10,7 @@
           - preupgrade-assistant
           - preupgrade-assistant-el6toel7
           - redhat-upgrade-tool
-          - mysql
+
 
         - name: Run preupgtool
           shell: 'preupg --text --force'
